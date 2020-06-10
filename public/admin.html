@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>IAEA - Admin tool</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+		<link rel="stylesheet" href="admin.css">
+	</head>
+	<body>
+		<header class="fluid-container px-3">
+			<h1>IAEA POC - Admin console</h1>
+		</header>
+		<main class="fluid-container px-3">
+			<div class="d-flex">
+				<div class="device d-flex flex-column" data-id="0">
+					<div class="device-header d-flex justify-content-between align-items-center px-2 py-1">
+						<span class="status"><strong>DEVICE 0</strong> disconnected</span>
+						<span class="badge badge-pill badge-success py-2 d-none" data-js="on">ON</span>
+						<span class="badge badge-pill badge-danger py-2" data-js="off">OFF</span>
+					</div>
+					<div class="device-body d-none">
+						<div class="d-flex justify-content-center align-items-center mt-3 px-2">
+							<span class="badge badge-pill badge-success py-2 d-none" data-js="start">Transmission started</span>
+							<span class="badge badge-pill badge-danger py-2" data-js="stop">Transmission stopped</span>
+							<span class="trans-count h5 px-2"></span>
+						</div>
+						<ul class="list-group mt-4 mx-2">
+							<li class="list-group-item d-flex justify-content-between">
+								<div>
+									<p class="h5 my-0">Temperature</p>
+									<span class="text-muted" data-js="ts"></span>
+								</div>
+								<span class="sensor-t h5" data-js="value_t"></span>
+							</li>
+							<li class="list-group-item d-flex justify-content-between">
+								<div>
+									<p class="h5 my-0">Humidity</p>
+									<span class="text-muted" data-js="ts"></span>
+								</div>
+								<span class="sensor-h h5" data-js="value_h"></span>
+							</li>
+						</ul>
+					</div>
+					<div class="mt-auto">Disconnect sensor</div>
+				</div>
+				<div class="device d-flex flex-column" data-id="1">
+					<div class="device-header d-flex justify-content-between align-items-center px-2 py-1">
+						<span class="status"><strong>DEVICE 1</strong> disconnected</span>
+						<span class="badge badge-pill badge-success py-2 d-none" data-js="on">ON</span>
+						<span class="badge badge-pill badge-danger py-2" data-js="off">OFF</span>
+					</div>
+					<div class="device-body d-none">
+						<div class="d-flex justify-content-center align-items-center mt-3 px-2">
+							<span class="badge badge-pill badge-success py-2 d-none" data-js="start">Transmission started</span>
+							<span class="badge badge-pill badge-danger py-2" data-js="stop">Transmission stopped</span>
+							<span class="trans-count h5 px-2"></span>
+						</div>
+						<ul class="list-group mt-4 mx-2">
+							<li class="list-group-item d-flex justify-content-between">
+								<div>
+									<p class="h5 my-0">Temperature</p>
+									<span class="text-muted" data-js="ts">23/05/2020 09:28:10</span>
+								</div>
+								<span class="sensor-t h5" data-js="value_t"></span>
+							</li>
+							<li class="list-group-item d-flex justify-content-between">
+								<div>
+									<p class="h5 my-0">Humedad</p>
+									<span class="text-muted" data-js="ts">23/05/2020 09:28:10</span>
+								</div>
+								<span class="sensor-h h5" data-js="value_h"></span>
+							</li>
+						</ul>
+					</div>
+					<div class="mt-auto">Disconnect sensor</div>
+				</div>
+			</div>
+		</main>
+
+		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+		<script src="admin.js"></script>
+		</body>
+	</body>
+</html>

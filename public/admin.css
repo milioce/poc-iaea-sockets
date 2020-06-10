@@ -1,0 +1,15 @@
+body {
+  font: 13px Helvetica, Arial;
+}
+.device {
+  border: #000 solid 1px;
+  padding: 5px;
+  width: 275px;
+  height: 450px;
+  margin: 0 5px;
+}
+.device-header {
+  background-color: #cccccc;
+  color: #000;
+  height: 40px;
+}

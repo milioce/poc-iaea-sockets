@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>IAEA - Simulate devices</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			body {
+				font: 13px Helvetica, Arial;
+			}
+			button {
+				padding: 5px;
+			}
+			#log {
+				border: #000 solid 1px;
+				height: 300px;
+				padding: 5px;
+			}
+			#log p {
+				margin-bottom: 1px;
+			}
+			#log p:last-child {
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<header class="fluid-container mx-2">
+			<h1>Socket.io POC Log</h1>
+		</header>
+		<main>
+			<div class="fluid-container mx-2 mt-2">
+				<div id="log"></div>
+			</div>
+		</main>
+
+			<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+			<script>
+				var $log = $('#log');
+				var socket;
+
+				$(document).ready(function() {
+					initialize();
+				});
+
+				function initialize() {
+				  socket = io();
+					const ts = new Date();
+					const data = {ts: ts.getTime()};
+					socket.emit('log-init', data);
+
+					socket.on('log', handleWriteLog);
+				}
+
+				function handleWriteLog(message) {
+					$log.append(`<p>${message}</p>`);
+				}
+			</script>
+		</body>
+	</body>
+</html>

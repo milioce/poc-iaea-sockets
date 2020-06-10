@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>IAEA - Simulate devices</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			body {
+				font: 13px Helvetica, Arial;
+			}
+			button {
+				padding: 5px;
+			}
+			.device {
+				border: #000 solid 1px;
+				padding: 5px;
+				width: 275px;
+				height: 450px;
+				margin: 0 5px;
+			}
+		</style>
+	</head>
+	<body>
+		<header class="container">
+			<h1>IAEA POC - Simulator</h1>
+		</header>
+		<main class="container">
+			<div class="d-flex">
+					<div class="device d-flex flex-column" data-id="0">
+						<div class="device-header d-flex justify-content-between align-items-center bg-info px-2 py-1">
+							<span class="text-white"><strong>DEVICE 0</strong> disconnected</span>
+							<button type="button" class="btn btn-sm btn-light" data-js="on">ON</button>
+							<button type="button" class="btn btn-sm btn-light d-none" data-js="off">OFF</button>
+						</div>
+						<div class="device-body d-none">
+							<div class="d-flex justify-content-between align-items-center mt-2 px-2">
+								<span class="trans-status">Transmission stopped</span>
+								<span class="trans-count h5 px-2"></span>
+								<button type="button" class="btn btn-sm btn-primary" data-js="start">Start</button>
+								<button type="button" class="btn btn-sm btn-danger d-none" data-js="stop">Stop</button>
+							</div>
+							<div class="d-flex justify-content-center align-items-center mt-2">
+								<button type="button" class="btn btn-success" data-js="send">Send data</button>
+							</div>
+							<ul class="list-group mt-4 mx-2">
+								<li class="list-group-item d-flex justify-content-between">
+									<p class="h5 my-0">Temperatura</p>
+									<span class="sensor-t h5" data-value="t2"></span>
+								</li>
+								<li class="list-group-item d-flex justify-content-between">
+									<p class="h5 my-0">Humedad</p>
+									<span class="sensor-h h5" data-value="h2"></span>
+								</li>
+							</ul>
+						</div>
+						<div class="d-none mt-auto align-self-end">
+						  <button type="button" class="btn btn-outline-info">Sensor connected</button>
+						</div>
+					</div>
+				<div>
+					<div class="device d-flex flex-column" data-id="1">
+						<div class="device-header d-flex justify-content-between align-items-center bg-info px-2 py-1">
+							<span class="text-white"><strong>DEVICE 1</strong> disconnected</span>
+							<button type="button" class="btn btn-sm btn-light" data-js="on">ON</button>
+							<button type="button" class="btn btn-sm btn-light d-none" data-js="off">OFF</button>
+						</div>
+						<div class="device-body d-none">
+							<div class="d-flex justify-content-between align-items-center mt-2 px-2">
+								<span class="trans-status">Transmission stopped</span>
+								<span class="trans-count h5 px-2"></span>
+								<button type="button" class="btn btn-sm btn-primary" data-js="start">Start</button>
+								<button type="button" class="btn btn-sm btn-danger d-none" data-js="stop">Stop</button>
+							</div>
+							<div class="d-flex justify-content-center align-items-center mt-2">
+								<button type="button" class="btn btn-success" data-js="send">Send data</button>
+							</div>
+							<ul class="list-group mt-4 mx-2">
+								<li class="list-group-item d-flex justify-content-between">
+									<p class="h5 my-0">Temperatura</p>
+									<span class="sensor-t h5" data-value="t2"></span>
+								</li>
+								<li class="list-group-item d-flex justify-content-between">
+									<p class="h5 my-0">Humedad</p>
+									<span class="sensor-h h5" data-value="h2"></span>
+								</li>
+							</ul>
+						</div>
+						<div class="d-none mt-auto align-self-end">
+						  <button type="button" class="btn btn-outline-info">Sensor connected</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+
+			<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+			<script>
+				var devices = [
+					{
+						dom: null,
+						socket: null,
+						timeout: null,
+						count: 0,
+						sensor_h: null,
+						sensor_t: null,
+						status: 'off'
+					},
+					{
+						dom: null,
+						socket: null,
+						timeout: null,
+						count: 0,
+						sensor_h: null,
+						sensor_t: null,
+						status: 'off'
+					}
+
+				]
+
+				$('[data-js=on]').on('click', handlerEventOn);
+				$('[data-js=off]').on('click', handlerEventOff);
+				$('[data-js=start]').on('click', handlerEventStart);
+				$('[data-js=stop]').on('click', handlerEventStop);
+				$('[data-js=send]').on('click', handlerEventSend);
+
+				$(document).ready(function() {
+					initialize();
+				});
+
+
+				function initialize() {
+					devices[0].dom = $('.device[data-id=0]');
+					devices[1].dom = $('.device[data-id=1]');
+				}
+
+				function getDeviceId(element) {
+					return $(element).closest('.device').data('id');
+				}
+
+				function handlerEventOn() {
+					var id = getDeviceId(this);
+					deviceOn(id);
+					console.log('Turn on device ' + id);
+				}
+
+				function handlerEventOff() {
+					var id = getDeviceId(this);
+					deviceOff(id);
+					console.log('Turn off device ' + id);
+				}
+
+				function handlerEventStart() {
+					var id = getDeviceId(this);
+					deviceStart(id);
+					console.log('Start device ' + id);
+				}
+
+				function handlerEventStop() {
+					var id = getDeviceId(this);
+					deviceStop(id);
+					console.log('Stop device ' + id);
+				}
+
+				function handlerEventSend() {
+					var id = getDeviceId(this);
+					deviceSendData(id);
+					console.log('Send data for device ' + id);
+				}
+
+				function deviceOn(id) {
+					devices[id].dom.find('[data-js=on]').addClass('d-none');
+					devices[id].dom.find('[data-js=off]').removeClass('d-none');
+					devices[id].dom.find('.device-body').removeClass('d-none');
+					devices[id].dom.find('.device-header span')
+						.html(`<strong>DEVICE ${id}</strong> connected`);
+
+				  devices[id].socket = io();
+					emitDeviceStatus(id, 'device-init');
+				}
+
+				function deviceOff(id) {
+					devices[id].dom.find('[data-js=on]').removeClass('d-none');
+					devices[id].dom.find('[data-js=off]').addClass('d-none');
+					devices[id].dom.find('.device-body').addClass('d-none');
+					devices[id].dom.find('.device-header span')
+						.html(`<strong>DEVICE ${id}</strong> disconnected`);
+
+					devices[id].socket.close();
+					stopTransmission(id);
+				}
+
+				function deviceStart(id) {
+					devices[id].dom.find('[data-js=start]').addClass('d-none');
+					devices[id].dom.find('[data-js=stop]').removeClass('d-none');
+					devices[id].dom.find('.trans-status')
+						.html(`Sending data...`);
+
+					emitDeviceStatus(id, 'device-start');
+					startTransmission(id);
+				}
+
+				function deviceSendData(id) {
+				}
+
+				function deviceStop(id) {
+					devices[id].dom.find('[data-js=start]').removeClass('d-none');
+					devices[id].dom.find('[data-js=stop]').addClass('d-none');
+					devices[id].dom.find('.trans-status')
+						.html(`Transmission stoped`);
+
+					emitDeviceStatus(id, 'device-stop');
+					stopTransmission(id);
+				}
+
+				function sensorStatus() {}
+
+				function startTransmission(id) {
+					if (devices[id].timeout) {
+						return;
+					}
+
+					var intervalId = setInterval(function() {
+						if (devices[id].count < 10) {
+							devices[id].count++;
+							devices[id].dom.find('.trans-count').text(devices[id].count);
+						} else {
+							devices[id].count = 0;
+							devices[id].dom.find('.trans-count').text('');
+							refreshDeviceSensors(id);
+							emitDeviceData(id);
+						}
+					}, 1000);
+
+					devices[id].timeout = intervalId;
+				}
+
+				function stopTransmission(id) {
+					if (devices[id].timeout) {
+						clearInterval(devices[id].timeout);
+					}
+					devices[id].count = 0;
+					devices[id].dom.find('.trans-count').text('');
+				}
+
+				function emitDeviceStatus(id, msg) {
+					if (!devices[id].socket) {
+						return;
+					}
+
+					const ts = new Date();
+					const data = {id: id, ts: ts.getTime()};
+					devices[id].socket.emit(msg, data);
+					console.log('emit %s ', msg, data);
+				}
+
+				function refreshDeviceSensors(id) {
+					var value_t = devices[id].sensor_t || 20;
+					var value_h = devices[id].sensor_h || 50;
+
+					value_t = value_t + getRandom(-2, 2);
+					value_h = value_h + getRandom(-5, 5);
+
+					devices[id].sensor_t = value_t;
+					devices[id].sensor_h = value_h;
+
+					text_t = parseFloat(value_t).toFixed(1);
+					text_h = parseFloat(value_h).toFixed(1);
+					devices[id].dom.find('.sensor-t').text(text_t + 'ºC');
+					devices[id].dom.find('.sensor-h').text(text_h + '%');
+				}
+
+				function emitDeviceData(id) {
+					if (!devices[id].socket) {
+						return;
+					}
+
+					const ts = new Date();
+					const data = {
+						id: id,
+						ts: ts.getTime(),
+						sensor: 1,
+						value_t: devices[id].sensor_t,
+						value_h: devices[id].sensor_h,
+						status: true
+					};
+
+					devices[id].socket.emit('device-data', data);
+					console.log('emit device-data', data);
+				}
+
+				function getRandom(min, max) {
+					var rest = (min < 0) ? 0 - min : 0;
+
+					rest = rest * 10;
+					min = (min < 0) ? 0 : min * 10;
+					max = max * 10;
+
+					var random = Math.floor(Math.random() * (max - min)) + min;
+
+					return (random - rest) / 10;
+				}
+
+			</script>
+		</body>
+	</body>
+</html>
