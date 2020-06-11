@@ -60,8 +60,11 @@
 								</li>
 							</ul>
 						</div>
-						<div class="d-none mt-auto align-self-end">
-						  <button type="button" class="btn btn-outline-info">Sensor connected</button>
+						<div class="d-none mt-auto align-self-end" data-js="blueon">
+						  <button type="button" class="btn btn-outline-info">Disconnect bluetooth</button>
+						</div>
+						<div class="d-none mt-auto align-self-end" data-js="blueoff">
+						  <button type="button" class="btn btn-outline-info">Connect bluetooth</button>
 						</div>
 					</div>
 				<div>
@@ -92,8 +95,11 @@
 								</li>
 							</ul>
 						</div>
-						<div class="d-none mt-auto align-self-end">
-						  <button type="button" class="btn btn-outline-info">Sensor connected</button>
+						<div class="d-none mt-auto align-self-end" data-js="blueon">
+						  <button type="button" class="btn btn-outline-info">Disconnect bluetooth</button>
+						</div>
+						<div class="d-none mt-auto align-self-end" data-js="blueoff">
+						  <button type="button" class="btn btn-outline-info">Connect bluetooth</button>
 						</div>
 					</div>
 				</div>
@@ -133,6 +139,8 @@
 				$('[data-js=start]').on('click', handlerEventStart);
 				$('[data-js=stop]').on('click', handlerEventStop);
 				$('[data-js=send]').on('click', handlerEventSend);
+				$('[data-js=blueon]').on('click', handlerEventBluetoothOn);
+				$('[data-js=blueoff]').on('click', handlerEventBluetoothOff);
 
 				$(document).ready(function() {
 					initialize();
@@ -180,9 +188,25 @@
 					console.log('Send data for device ' + id);
 				}
 
+				function handlerEventBluetoothOn() {
+					var id = getDeviceId(this);
+					deviceBluetooth(id, false);
+					console.log('Connect bluetooth device ' + id);
+				}
+
+				function handlerEventBluetoothOff() {
+					var id = getDeviceId(this);
+					deviceBluetooth(id, true);
+					console.log('Disconnect bluetooth for device ' + id);
+				}
+
 				function deviceOn(id) {
 					devices[id].dom.find('[data-js=on]').addClass('d-none');
 					devices[id].dom.find('[data-js=off]').removeClass('d-none');
+
+					devices[id].dom.find('[data-js=blueon]').removeClass('d-none');
+					devices[id].dom.find('[data-js=blueoff]').addClass('d-none');
+
 					devices[id].dom.find('.device-body').removeClass('d-none');
 					devices[id].dom.find('.device-header span')
 						.html(`<strong>DEVICE ${id}</strong> connected`);
@@ -225,7 +249,17 @@
 					stopTransmission(id);
 				}
 
-				function sensorStatus() {}
+				function deviceBluetooth(id, status) {
+					if (status) {
+						devices[id].dom.find('[data-js=blueon]').removeClass('d-none');
+						devices[id].dom.find('[data-js=blueoff]').addClass('d-none');
+					} else {
+						devices[id].dom.find('[data-js=blueon]').addClass('d-none');
+						devices[id].dom.find('[data-js=blueoff]').removeClass('d-none');
+					}
+
+					emitSensorStatus(id, status);
+				}
 
 				function startTransmission(id) {
 					if (devices[id].timeout) {
@@ -253,6 +287,18 @@
 					}
 					devices[id].count = 0;
 					devices[id].dom.find('.trans-count').text('');
+				}
+
+				function emitSensorStatus(id, status) {
+					if (!devices[id].socket) {
+						console.log(`socket ${id} not found`);
+				 		return;
+					}
+
+					const ts = new Date();
+					const data = {id: devices[id].mac, sensor: 'all', status: status, ts: ts.getTime()};
+					devices[id].socket.emit('sensor-status', data);
+					console.log('emit sensor-status', data);
 				}
 
 				function emitDeviceStatus(id, msg) {

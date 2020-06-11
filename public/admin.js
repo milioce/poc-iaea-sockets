@@ -29,6 +29,9 @@ jQuery(function($) {
     if (data.event === 'device-data') {
       lib.deviceData(data);
     }
+    if (data.event === 'sensor-status') {
+      lib.sensorStatus(data);
+    }
   });
 });
 
@@ -66,6 +69,9 @@ lib = {
     this.devices[data.index].dom.find('.device-body').removeClass('d-none');
     this.devices[data.index].dom.find('.device-header .status')
       .html(`<strong>DEVICE ${data.index}</strong> connected`);
+
+    this.devices[data.index].dom.find('[data-js=mac]')
+      .text('ID: ' + data.id);
   },
 
   deviceTurnOff: function(data) {
@@ -98,7 +104,14 @@ lib = {
     this.devices[data.index].dom.find('[data-js=ts]').text(text_ts);
   },
 
-  deviceXXX: function(id) {
+  sensorStatus: function(data) {
+    if (data.status) {
+      this.devices[data.index].dom.find('[data-js=blueon]').removeClass('d-none');
+      this.devices[data.index].dom.find('[data-js=blueoff]').addClass('d-none');
+    } else {
+      this.devices[data.index].dom.find('[data-js=blueon]').addClass('d-none');
+      this.devices[data.index].dom.find('[data-js=blueoff]').removeClass('d-none');
+    }
   },
 
   getTimestamp: function(ts) {

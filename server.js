@@ -21,6 +21,7 @@ io.on('connection', (socket) => {
   log(`socket connected ${socket.id}`);
 
   socket.on('device-init', (msg, callback) => {
+    console.log('device-init', msg);
     const index = getDeviceIndex(msg.id);
     if (index === -1) {
       devices.push(msg.id);
@@ -30,7 +31,7 @@ io.on('connection', (socket) => {
     }
     socket.extid = msg.id;
     socket.type = 'device';
-    log(`device-init - id: ${msg.id} ts: ${msg.ts} socket: ${socket.id}`);
+    log(`device-init - id: ${msg.id} ts: ${msg.ts} socket: ${socket.id} index: ${index}`);
     emitAdminEvent('device-init', msg, socket.index);
 
     if (callback) {
@@ -108,7 +109,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('sensor-status', (data, callback) => {
-    console.log('sensor-status', data);
     const message = `sensor-status - id: ${data.id} `
       + ` ts: ${data.ts}`
       + ` sensor: ${data.sensor} `
@@ -125,10 +125,13 @@ io.on('connection', (socket) => {
 function getDeviceIndex(mac) {
   for (let index = 0; index < devices.length; index++) {
     if (devices[index] === mac) {
+      console.log('get device index for mac ' + mac + ' is index', devices);
       console.log(`Index for ${mac} is ${index}`);
       return index;
     }
   }
+
+  console.log('get device index for mac ' + mac + ' not found', devices);
 
   return -1;
 }
