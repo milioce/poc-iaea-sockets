@@ -1,5 +1,6 @@
 body {
   font: 13px Helvetica, Arial;
+  color: #333;
 }
 .device {
   border: #000 solid 1px;
@@ -12,4 +13,23 @@ body {
   background-color: #cccccc;
   color: #000;
   height: 40px;
+}
+.sensor-t,
+.sensor-h {
+  font-weight: bold;
+}
+img.bluetooth {
+  width: 30%;
+}
+img.icon-temperature {
+  width: 64%;
+}
+img.icon-humidity {
+  width: 64%;
+}
+.wd75 {
+  width: 75%
+}
+.wd25 {
+  width: 25%
 }
