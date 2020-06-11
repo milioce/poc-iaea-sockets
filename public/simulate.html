@@ -33,7 +33,7 @@
 		</header>
 		<main class="container">
 			<div class="d-flex">
-					<div class="device d-flex flex-column" data-id="0">
+					<div class="device d-flex flex-column" data-id="0" data-mac="e3:8b:71:c9:c7:b5">
 						<div class="device-header d-flex justify-content-between align-items-center bg-info px-2 py-1">
 							<span class="text-white"><strong>DEVICE 0</strong> disconnected</span>
 							<button type="button" class="btn btn-sm btn-light" data-js="on">ON</button>
@@ -65,7 +65,7 @@
 						</div>
 					</div>
 				<div>
-					<div class="device d-flex flex-column" data-id="1">
+					<div class="device d-flex flex-column" data-id="1" data-mac="4c:6f:40:fd:6d:ee">
 						<div class="device-header d-flex justify-content-between align-items-center bg-info px-2 py-1">
 							<span class="text-white"><strong>DEVICE 1</strong> disconnected</span>
 							<button type="button" class="btn btn-sm btn-light" data-js="on">ON</button>
@@ -103,6 +103,7 @@
 			<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
 			<script>
+				var delay = 3;
 				var devices = [
 					{
 						dom: null,
@@ -111,7 +112,8 @@
 						count: 0,
 						sensor_h: null,
 						sensor_t: null,
-						status: 'off'
+						status: 'off',
+						mac: ''
 					},
 					{
 						dom: null,
@@ -120,7 +122,8 @@
 						count: 0,
 						sensor_h: null,
 						sensor_t: null,
-						status: 'off'
+						status: 'off',
+						mac: ''
 					}
 
 				]
@@ -139,6 +142,8 @@
 				function initialize() {
 					devices[0].dom = $('.device[data-id=0]');
 					devices[1].dom = $('.device[data-id=1]');
+					devices[0].mac = devices[0].dom.data('mac');
+					devices[1].mac = devices[1].dom.data('mac');
 				}
 
 				function getDeviceId(element) {
@@ -228,7 +233,7 @@
 					}
 
 					var intervalId = setInterval(function() {
-						if (devices[id].count < 10) {
+						if (devices[id].count < delay) {
 							devices[id].count++;
 							devices[id].dom.find('.trans-count').text(devices[id].count);
 						} else {
@@ -252,11 +257,12 @@
 
 				function emitDeviceStatus(id, msg) {
 					if (!devices[id].socket) {
-						return;
+						console.log(`socket ${id} not found`);
+				 		return;
 					}
 
 					const ts = new Date();
-					const data = {id: id, ts: ts.getTime()};
+					const data = {id: devices[id].mac, ts: ts.getTime()};
 					devices[id].socket.emit(msg, data);
 					console.log('emit %s ', msg, data);
 				}

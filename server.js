@@ -8,6 +8,7 @@ var port = process.env.PORT || 8080;
 var admins = [];
 var devices = [];
 var logs = [];
+const success = { error: false };
 
 server.listen(port, () => {
   console.log('Server listening at port %d', port);
@@ -19,55 +20,79 @@ app.use(express.static(path.join(__dirname, 'public')));
 io.on('connection', (socket) => {
   log(`socket connected ${socket.id}`);
 
-  socket.on('device-init', (msg) => {
-    socket.id = msg.id;
+  socket.on('device-init', (msg, callback) => {
+    const index = getDeviceIndex(msg.id);
+    if (index === -1) {
+      devices.push(msg.id);
+      socket.index = devices.length - 1;
+    } else {
+      socket.index = index;
+    }
+    socket.extid = msg.id;
     socket.type = 'device';
-    socket.index = devices.length;
-    devices.push(socket);
-    log(`device-init - id: ${msg.id} ts: ${msg.ts}`);
-    emitAdminEvent('device-init', msg);
+    log(`device-init - id: ${msg.id} ts: ${msg.ts} socket: ${socket.id}`);
+    emitAdminEvent('device-init', msg, socket.index);
+
+    if (callback) {
+      callback(success);
+    }
   });
 
-  socket.on('admin-init', (msg) => {
-    socket.id = msg.id;
+  socket.on('admin-init', (msg, callback) => {
+    const index = admins.length;
+    socket.extid = msg.id;
     socket.type = 'admin';
-    socket.index = admins.length;
+    socket.index = index;
     admins.push(socket);
-    log(`admin-init - id: ${msg.id} ts: ${msg.ts}`);
+    log(`admin-init - id: ${msg.extid} ts: ${msg.ts}`);
+
+    if (callback) {
+      callback(success);
+    }
   });
 
-  socket.on('log-init', (msg) => {
-    socket.id = null;
+  socket.on('log-init', (msg, callback) => {
+    socket.extid = null;
     socket.type = 'log';
     socket.index = logs.length;
     logs.push(socket);
     console.log(`log-init - ts: ${msg.ts}`);
-  });
 
-  socket.on('disconnect', () => {
-    log('socket disconnected ' + socket.id);
-    if (socket.type === 'device') {
-      const data = {id: socket.id};
-      emitAdminEvent('device-disconnect', data);
+    if (callback) {
+      callback(success);
     }
   });
 
-  socket.on('device-start', (msg) => {
-    log(`device-start - id: ${msg.id} ts: ${msg.ts}`);
-    emitAdminEvent('device-start', msg);
+  socket.on('disconnect', () => {
+    if (socket.type === 'device') {
+      log(`device disconnected: id: ${socket.extid} socket: ${socket.id}`);
+      const data = {id: socket.extid};
+      emitAdminEvent('device-disconnect', data, socket.index);
+    } else {
+      log(`socket disconnected ${socket.type} socket: ${socket.id}`);
+    }
   });
 
-  socket.on('device-stop', (msg) => {
-    log(`device-stop - id: ${msg.id} ts: ${msg.ts}`);
-    emitAdminEvent('device-stop', msg);
+  socket.on('device-start', (msg, callback) => {
+    log(`device-start - id: ${socket.extid} ts: ${msg.ts}`);
+    emitAdminEvent('device-start', msg, socket.index);
+
+    if (callback) {
+      callback(success);
+    }
+});
+
+  socket.on('device-stop', (msg, callback) => {
+    log(`device-stop - id: ${socket.extid} ts: ${msg.ts}`);
+    emitAdminEvent('device-stop', msg, socket.index);
+
+    if (callback) {
+      callback(success);
+    }
   });
 
   socket.on('device-data', (data, callback) => {
     console.log('device-data', data);
-    if (callback) {
-      callback('received from socket.id' + socket.id);
-    }
-
     const message = `device-data - id: ${data.id} `
       + ` ts: ${data.ts}`
       + ` sensor: ${data.sensor} `
@@ -75,31 +100,45 @@ io.on('connection', (socket) => {
       + ` value_h: ${data.value_h}`
       + ` status: ${data.status}`;
     log(message);
-    emitAdminEvent('device-data', data);
+    emitAdminEvent('device-data', data, socket.index);
+
+    if (callback) {
+      callback(success);
+    }
   });
 
   socket.on('sensor-status', (data, callback) => {
     console.log('sensor-status', data);
-    if (callback) {
-      const obj = { error: false };
-      callback(obj);
-    }
-
     const message = `sensor-status - id: ${data.id} `
       + ` ts: ${data.ts}`
       + ` sensor: ${data.sensor} `
       + ` status: ${data.status}`;
     log(message);
-    emitAdminEvent('sensor-status', data);
+    emitAdminEvent('sensor-status', data, socket.index);
+
+    if (callback) {
+      callback(success);
+    }
   });
 });
+
+function getDeviceIndex(mac) {
+  for (let index = 0; index < devices.length; index++) {
+    if (devices[index] === mac) {
+      console.log(`Index for ${mac} is ${index}`);
+      return index;
+    }
+  }
+
+  return -1;
+}
 
 function log(message) {
   console.log(message);
   logs.forEach(socket => socket.emit('log', message));
 }
 
-function emitAdminEvent(event, data) {
-  const msg = {...data, event: event};
+function emitAdminEvent(event, data, index) {
+  const msg = {...data, event: event, index: index};
   admins.forEach(socket => socket.emit('admin-event', msg));
 }

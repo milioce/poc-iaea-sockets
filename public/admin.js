@@ -15,19 +15,19 @@ jQuery(function($) {
   socket.on('admin-event', function(data) {
     console.log('admin-event', data);
     if (data.event === 'device-init') {
-      lib.deviceTurnOn(data.id);
+      lib.deviceTurnOn(data);
     }
     if (data.event === 'device-disconnect') {
-      lib.deviceTurnOff(data.id);
+      lib.deviceTurnOff(data);
     }
     if (data.event === 'device-start') {
-      lib.deviceStart(data.id);
+      lib.deviceStart(data);
     }
     if (data.event === 'device-stop') {
-      lib.deviceStop(data.id);
+      lib.deviceStop(data);
     }
     if (data.event === 'device-data') {
-      lib.deviceData(data.id, data);
+      lib.deviceData(data);
     }
   });
 });
@@ -60,42 +60,42 @@ lib = {
     this.devices[1].dom = $('.device[data-id=1]');
   },
 
-  deviceTurnOn: function(id) {
-    this.devices[id].dom.find('[data-js=on]').removeClass('d-none');
-    this.devices[id].dom.find('[data-js=off]').addClass('d-none');
-    this.devices[id].dom.find('.device-body').removeClass('d-none');
-    this.devices[id].dom.find('.device-header .status')
-      .html(`<strong>DEVICE ${id}</strong> connected`);
+  deviceTurnOn: function(data) {
+    this.devices[data.index].dom.find('[data-js=on]').removeClass('d-none');
+    this.devices[data.index].dom.find('[data-js=off]').addClass('d-none');
+    this.devices[data.index].dom.find('.device-body').removeClass('d-none');
+    this.devices[data.index].dom.find('.device-header .status')
+      .html(`<strong>DEVICE ${data.index}</strong> connected`);
   },
 
-  deviceTurnOff: function(id) {
-    this.devices[id].dom.find('[data-js=on]').addClass('d-none');
-    this.devices[id].dom.find('[data-js=off]').removeClass('d-none');
-    this.devices[id].dom.find('.device-body').addClass('d-none');
-    this.devices[id].dom.find('.device-header .status')
-      .html(`<strong>DEVICE ${id}</strong> disconnected`);
+  deviceTurnOff: function(data) {
+    this.devices[data.index].dom.find('[data-js=on]').addClass('d-none');
+    this.devices[data.index].dom.find('[data-js=off]').removeClass('d-none');
+    this.devices[data.index].dom.find('.device-body').addClass('d-none');
+    this.devices[data.index].dom.find('.device-header .status')
+      .html(`<strong>DEVICE ${data.index}</strong> disconnected`);
   },
 
-  deviceStart: function(id) {
-    this.devices[id].dom.find('[data-js=start]').removeClass('d-none');
-    this.devices[id].dom.find('[data-js=stop]').addClass('d-none');
+  deviceStart: function(data) {
+    this.devices[data.index].dom.find('[data-js=start]').removeClass('d-none');
+    this.devices[data.index].dom.find('[data-js=stop]').addClass('d-none');
   },
 
-  deviceStop: function(id) {
-    this.devices[id].dom.find('[data-js=start]').addClass('d-none');
-    this.devices[id].dom.find('[data-js=stop]').removeClass('d-none');
+  deviceStop: function(data) {
+    this.devices[data.index].dom.find('[data-js=start]').addClass('d-none');
+    this.devices[data.index].dom.find('[data-js=stop]').removeClass('d-none');
   },
 
-  deviceData: function(id, data) {
+  deviceData: function(data) {
     text_t = parseFloat(data.value_t).toFixed(1);
     text_h = parseFloat(data.value_h).toFixed(1);
-    this.devices[id].dom.find('[data-js=value_t]')
+    this.devices[data.index].dom.find('[data-js=value_t]')
     .text(text_t + 'ºC');
-    this.devices[id].dom.find('[data-js=value_h]')
+    this.devices[data.index].dom.find('[data-js=value_h]')
     .text(text_h + '%');
 
     text_ts = lib.getTimestamp(data.ts);
-    this.devices[id].dom.find('[data-js=ts]').text(text_ts);
+    this.devices[data.index].dom.find('[data-js=ts]').text(text_ts);
   },
 
   deviceXXX: function(id) {
