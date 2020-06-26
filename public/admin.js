@@ -93,8 +93,8 @@ lib = {
   },
 
   deviceData: function(data) {
-    text_t = parseFloat(data.value_t).toFixed(1);
-    text_h = parseFloat(data.value_h).toFixed(1);
+    text_t = parseFloat(data.value_t).toFixed(6);
+    text_h = parseFloat(data.value_h).toFixed(6);
     this.devices[data.index].dom.find('[data-js=value_t]')
     .text(text_t + 'ºC');
     this.devices[data.index].dom.find('[data-js=value_h]')
